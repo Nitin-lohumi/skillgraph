@@ -282,7 +282,3 @@ skillgraph/
 ```
 
 ---
-
-## Live Demo
-
-- **Hosted app:** 
