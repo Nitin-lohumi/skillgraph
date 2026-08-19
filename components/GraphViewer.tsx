@@ -42,6 +42,7 @@ export default function GraphViewer({
   const onNodeClickRef = useRef(onNodeClick);
   onNodeClickRef.current = onNodeClick;
 
+  // Create the graph instance once
   useEffect(() => {
     if (!containerRef.current) return;
     let disposed = false;
@@ -90,7 +91,13 @@ export default function GraphViewer({
         .onNodeClick((node: any) => {
           onNodeClickRef.current?.(node as GraphNode);
         })
-        .cooldownTicks(100);
+        .cooldownTicks(100)
+        .onEngineStop(() => {
+          // Fit all nodes into view once the simulation settles —
+          // without this, nodes can render outside the visible canvas
+          // area until the user manually zooms/pans.
+          graphInstanceRef.current?.zoomToFit(400, 40);
+        });
 
       graph.width(containerRef.current.clientWidth);
       graph.height(height);
@@ -108,24 +115,30 @@ export default function GraphViewer({
         containerRef.current.innerHTML = "";
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update data whenever nodes/links change
   useEffect(() => {
-    if (graphInstanceRef.current) {
+    function applyData() {
+      if (!graphInstanceRef.current) return;
       graphInstanceRef.current.graphData({
         nodes: nodes.map((n) => ({ ...n })),
         links: links.map((l) => ({ ...l })),
       });
+      // New data means a fresh simulation — give it a moment to settle,
+      // then fit the view. onEngineStop covers the first load; this
+      // covers subsequent data changes (e.g. clicking a node in Explore).
+      setTimeout(() => {
+        graphInstanceRef.current?.zoomToFit(400, 40);
+      }, 300);
+    }
+
+    if (graphInstanceRef.current) {
+      applyData();
     } else {
-      const timeout = setTimeout(() => {
-        if (graphInstanceRef.current) {
-          graphInstanceRef.current.graphData({
-            nodes: nodes.map((n) => ({ ...n })),
-            links: links.map((l) => ({ ...l })),
-          });
-        }
-      }, 200);
+      // graph instance not ready yet, retry shortly
+      const timeout = setTimeout(applyData, 200);
       return () => clearTimeout(timeout);
     }
   }, [nodes, links]);
