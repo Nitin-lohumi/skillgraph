@@ -67,9 +67,9 @@ export default function SearchBar() {
   }
 
   return (
-    <div ref={containerRef} className="relative w-80">
+    <div ref={containerRef} className="relative w-full max-w-[220px] sm:max-w-xs md:w-80 md:max-w-none">
       <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
-        <Search size={16} className="text-zinc-500" />
+        <Search size={16} className="text-zinc-500 shrink-0" />
         <input
           value={query}
           onChange={(e) => {
@@ -77,14 +77,14 @@ export default function SearchBar() {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="Search developer, skill or role..."
-          className="bg-transparent outline-none text-sm text-zinc-200 placeholder:text-zinc-500 w-full"
+          placeholder="Search..."
+          className="bg-transparent outline-none text-sm text-zinc-200 placeholder:text-zinc-500 w-full min-w-0"
         />
-        {loading && <Loader2 size={14} className="animate-spin text-zinc-500" />}
+        {loading && <Loader2 size={14} className="animate-spin text-zinc-500 shrink-0" />}
       </div>
 
       {open && query.trim().length >= 2 && (
-        <div className="absolute mt-1 w-full bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto">
+        <div className="absolute right-0 mt-1 w-72 max-w-[85vw] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto">
           {results.length === 0 && !loading && (
             <p className="text-xs text-zinc-500 px-3 py-3">No results found.</p>
           )}
@@ -92,10 +92,10 @@ export default function SearchBar() {
             <button
               key={`${r.type}-${r.id}`}
               onClick={() => handleSelect(r)}
-              className="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center justify-between text-sm"
+              className="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center justify-between text-sm gap-2"
             >
-              <span className="text-zinc-200">{r.label}</span>
-              <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+              <span className="text-zinc-200 truncate">{r.label}</span>
+              <span className="text-[10px] uppercase tracking-wide text-zinc-500 shrink-0">
                 {r.type}
               </span>
             </button>
